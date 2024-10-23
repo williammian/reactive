@@ -1,0 +1,137 @@
+Tipos de interfaces de repositório
+
+As interfaces de repositório do Spring fazem parte do Spring Data, um projeto que visa simplificar o acesso e a
+manipulação de dados persistidos em bancos de dados. O Spring Data oferece uma abordagem consistente e
+baseada em padrões para interagir com diferentes tipos de repositórios de dados, como bancos de dados relacionais,
+bancos de dados NoSQL e outros.
+
+Interfaces de repositório proporcionam uma maneira robusta e eficiente de lidar com operações de persistência
+de maneira síncrona ou reativa. A escolha da interface adequada depende das especificidades da sua aplicação,
+como o tipo de banco de dados usado e a necessidade de operações reativas.
+
+Listamos abaixo algumas das principais interfaces.
+
+CrudRepository
+
+CrudRepository é a interface mais básica do Spring Data e fornece métodos genéricos para operações CRUD
+(Create, Read, Update, Delete). É o ponto de partida para criar repositórios para qualquer entidade de domínio.
+
+Principais métodos
+
+save(S entity): Salva uma entidade.
+saveAll(Iterable<S> entities): Salva múltiplas entidades.
+findById(ID id): Encontra uma entidade pelo seu ID.
+existsById(ID id): Verifica se uma entidade existe pelo seu ID.
+findAll(): Retorna todas as entidades.
+findAllById(Iterable<ID> ids): Retorna todas as entidades com os IDs fornecidos.
+count(): Retorna o número de entidades.
+deleteById(ID id): Deleta uma entidade pelo seu ID.
+delete(T entity): Deleta uma entidade.
+deleteAll(Iterable<? extends T> entities): Deleta múltiplas entidades.
+deleteAll(): Deleta todas as entidades.
+
+Exemplo de uso
+
+import org.springframework.data.repository.CrudRepository;
+
+public interface UserRepository extends CrudRepository<User, Long> {
+    List<User> findByLastName(String lastName);
+}
+
+-------------------------------
+
+ReactiveCrudRepository
+
+ReactiveCrudRepository é parte do Spring Data Reactive, proporcionando operações CRUD de maneira reativa.
+É especialmente útil para aplicações que precisam de alta escalabilidade e baixa latência.
+
+Principais métodos
+
+Mono<S> save(S entity): Salva uma entidade.
+Flux<S> saveAll(Iterable<S> entities): Salva múltiplas entidades.
+Mono<T> findById(ID id): Encontra uma entidade pelo seu ID.
+Mono<Boolean> existsById(ID id): Verifica se uma entidade existe pelo seu ID.
+Flux<T> findAll(): Retorna todas as entidades.
+Flux<T> findAllById(Iterable<ID> ids): Retorna todas as entidades com os IDs fornecidos.
+Mono<Long> count(): Retorna o número de entidades.
+Mono<Void> deleteById(ID id): Deleta uma entidade pelo seu ID.
+Mono<Void> delete(T entity): Deleta uma entidade.
+Mono<Void> deleteAll(Iterable<? extends T> entities): Deleta múltiplas entidades.
+Mono<Void> deleteAll(): Deleta todas as entidades.
+
+Exemplo de uso
+
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import reactor.core.publisher.Flux;
+
+public interface UserRepository extends ReactiveCrudRepository<User, Long> {
+    Flux<User> findByLastName(String lastName);
+}
+
+------------------------------------------
+
+PagingAndSortingRepository
+PagingAndSortingRepository estende CrudRepository e adiciona funcionalidades para paginação e ordenação,
+sendo muito útil quando é preciso lidar com grandes conjuntos de dados.
+
+Principais métodos
+
+Iterable<T> findAll(Sort sort): Retorna todas as entidades ordenadas.
+Page<T> findAll(Pageable pageable): Retorna uma página de entidades.
+
+Exemplo de uso
+
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+public interface UserRepository extends PagingAndSortingRepository<User, Long> {
+    Page<User> findByLastName(String lastName, Pageable pageable);
+}
+
+----------------------------------------------
+
+JpaRepository
+
+JpaRepository estende PagingAndSortingRepository e adiciona métodos específicos do JPA,
+fornecendo uma interface mais rica para interagir com bancos de dados relacionais usando JPA.
+
+Principais métodos
+
+void flush(): Sincroniza o contexto de persistência com o banco de dados.
+<S extends T> List<S> saveAllAndFlush(Iterable<S> entities): Salva todas as entidades e sincroniza.
+void deleteAllInBatch(Iterable<T> entities): Deleta todas as entidades em batch.
+void deleteAllByIdInBatch(Iterable<ID> ids): Deleta todas as entidades com os IDs fornecidos em batch.
+List<T> findAll(): Retorna todas as entidades.
+List<T> findAll(Sort sort): Retorna todas as entidades ordenadas.
+List<T> findAllById(Iterable<ID> ids): Retorna todas as entidades com os IDs fornecidos.
+
+Exemplo de uso
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface UserRepository extends JpaRepository<User, Long> {
+    List<User> findByFirstNameAndLastName(String firstName, String lastName);
+}
+
+-------------------------------------------------
+
+MongoRepository
+
+MongoRepository é uma interface do Spring Data MongoDB que estende PagingAndSortingRepository e
+adiciona métodos específicos para interagir com MongoDB.
+
+Principais métodos
+
+Além dos métodos herdados de PagingAndSortingRepository e CrudRepository,
+MongoRepository não adiciona métodos novos diretamente, mas fornece suporte completo para operações MongoDB.
+
+Exemplo de uso
+
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+public interface UserRepository extends MongoRepository<User, String> {
+    List<User> findByLastName(String lastName);
+}
+
+---------------------------------------------------

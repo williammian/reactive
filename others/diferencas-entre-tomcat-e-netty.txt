@@ -1,0 +1,78 @@
+Diferenças entre Tomcat e Netty
+
+Ao iniciar a aplicação, foi possível perceber que, em vez de visualizarmos o conhecido log:
+"Tomcat started on port 8080 (http)", ao incluir a dependência do Spring Reactive Web passou a aparecer
+o log "Netty started on port 8080 (http)". Mas afinal o que é o Netty e qual a sua diferença para o Tomcat?
+
+Tomcat e Netty são servidores de aplicação usados para lidar com requisições e respostas HTTP,
+mas eles são projetados com diferentes filosofias e objetivos. Leia abaixo as diferenças em detalhes.
+
+Apache Tomcat
+
+1. Arquitetura e modelo de threads
+
+- Modelo baseado em threads: Tomcat usa um modelo baseado em threads em que cada requisição é tratada por uma
+thread separada. Isto pode levar a problemas de escalabilidade quando há um grande número de requisições simultâneas,
+já que o gerenciamento de threads pode se tornar custoso.
+
+- Bloqueio I/O: Tomcat tradicionalmente utiliza I/O bloqueante, em que cada operação de I/O (como leitura de
+dados do cliente) bloqueia a thread até que a operação seja concluída.
+
+2. Compatibilidade
+
+- Java EE (Jakarta EE): Tomcat é um servidor de container de servlet que suporta especificações Java EE
+(agora Jakarta EE), como Servlets, JSP e WebSockets.
+Ele é amplamente usado para hospedar aplicações Java tradicionais.
+
+- Frameworks Suportados: Ele é frequentemente usado com frameworks como Spring MVC.
+
+3. Configuração e uso
+
+- Facilidade de uso: Tomcat é conhecido por sua facilidade de configuração e uso,
+especialmente para desenvolvedores Java, graças à sua instalação descomplicada,
+integração nativa com o ecossistema Java e interface intuitiva para gerenciamento de aplicações.
+
+- Arquivos de configuração: Utiliza arquivos de configuração XML, como server.xml e web.xml.
+
+Netty
+
+1. Arquitetura e modelo de threads
+
+- Modelo assíncrono e não bloqueante: Netty é um framework de rede assíncrono e não bloqueante,
+projetado para alta escalabilidade. Ele usa um modelo de I/O não bloqueante,
+em que operações de I/O não bloqueiam a thread que as executa,
+permitindo que a mesma thread gerencie múltiplas conexões simultâneas de forma eficiente.
+
+- Event loop: Utiliza um modelo de loop de eventos (event loop) em que um pequeno número de threads
+(geralmente igual ao número de núcleos da CPU) processa todas as conexões.
+Cada thread no event loop processa eventos de múltiplas conexões, melhorando a eficiência e a escalabilidade.
+
+2. Flexibilidade e desempenho
+
+- Desempenho alto: Netty é projetado para ser altamente performático e eficiente em termos de recursos,
+sendo adequado para aplicações que requerem alta taxa de transferência e baixa latência.
+
+- Protocolos de rede: Suporta uma ampla gama de protocolos de rede além de HTTP, como TCP, UDP, WebSocket etc.
+
+3. Compatibilidade
+
+- Frameworks suportados: Netty não é limitado a Java EE e pode ser usado como base para frameworks reativos
+e não bloqueantes, como Spring WebFlux e Akka.
+
+- Aplicações personalizadas: Netty é altamente configurável e é ideal para a construção de servidores de
+aplicação personalizados e específicos, em que você tem controle sobre o pipeline de processamento de dados.
+
+4. Complexidade
+
+- Maior flexibilidade, maior complexidade: Devido à sua flexibilidade e poder,
+Netty pode ser mais complexo de configurar e usar em comparação com Tomcat.
+Requer um entendimento mais profundo de conceitos de programação assíncrona e de rede.
+
+Resumindo
+
+Tomcat é ideal para aplicações Java EE tradicionais com uma abordagem de I/O bloqueante e um modelo de threads simples.
+É fácil de configurar e usar, mas pode enfrentar problemas de escalabilidade em situações de alta carga.
+
+Netty é melhor para aplicações que requerem alta escalabilidade e desempenho com um modelo de I/O não bloqueante e
+assíncrono. Apesar de ser mais complexo, é altamente flexível e eficiente,
+suportando uma variedade de protocolos de rede e casos de uso.

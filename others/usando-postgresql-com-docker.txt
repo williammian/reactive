@@ -1,0 +1,72 @@
+Usando o PostgreSQL com Docker
+
+docker run --name container-postgresql -e POSTGRES_DB=codechella -e POSTGRES_USER=usuario -e POSTGRES_PASSWORD=senha -p 5432:5432 -d postgres
+
+Este comando faz o seguinte:
+
+--name container-postgresql: Dá um nome ao container.
+-e POSTGRES_DB=codechella: Define o nome do banco de dados.
+-e POSTGRES_USER=usuario: Define o nome do usuário.
+-e POSTGRES_PASSWORD=senha: Define a senha do usuário.
+-p 5432:5432: Mapeia a porta 5432 do host para a porta 5432 do container.
+-d postgres: Especifica a imagem do PostgreSQL a ser utilizada.
+
+Feito isso, é necessário alterar a configuração do Spring Boot para se conectar corretamente ao PostgreSQL
+que está sendo executado a partir do container. No seu projeto Spring Boot,
+abra o arquivo src/main/resources/application.properties e ajuste as seguintes configurações:
+
+spring.r2dbc.url=r2dbc:postgresql://localhost:5432/codechella
+spring.r2dbc.username=usuario
+spring.r2dbc.password=senha
+
+spring.flyway.url=jdbc:postgresql://localhost:5432/codechella
+spring.flyway.user=usuario
+spring.flyway.password=senha
+
+Feito isso, basta executar a aplicação e verificar que os dados foram persistidos corretamente.
+Lembrando que no comando acima não estamos mapeando o volume, ou seja, ao destruir o container,
+os dados não serão persistidos. Caso deseje que os dados sejam persistidos é necessário que seja
+adicionada ao comando acima a flag que mapeia o volume:
+
+docker run --name container-postgresql -e POSTGRES_DB=codechella -e POSTGRES_USER=usuario -e POSTGRES_PASSWORD=senha -p 5432:5432 -v dados-postgres:/var/lib/postgresql/data -d postgres
+
+Também há a possibilidade de criar um arquivo docker-compose.yml para já executar o banco e a aplicação,
+isso é recomendado quando a aplicação já está completamente pronta, pois você precisará criar a imagem da sua aplicação.
+Para criar essa imagem, deve-se construir o arquivo jar, geralmente através do comando mvn clean package,
+quando estamos utilizando o Maven. Abaixo está um exemplo do arquivo Docker Compose para essa aplicação.
+Ele utiliza uma imagem de uma aplicação específica, já hospedada no Docker Hub:
+
+version: '3.4'
+
+services:
+  postgres:
+    image: postgres
+    container_name: container-postgresql
+    environment:
+      POSTGRES_DB: codechella
+      POSTGRES_USER: usuario
+      POSTGRES_PASSWORD: senha
+    ports:
+      - "5432:5432"
+
+  codechella-webflux:
+    image: docker.io/jacquelineoliveira/codechella-webflux:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    depends_on:
+      - postgres
+    ports:
+      - 8080:8080
+    volumes:
+      - .:/app
+    environment:
+      SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/codechella
+      SPRING_R2DBC_USERNAME: usuario
+      SPRING_R2DBC_PASSWORD: senha
+      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/codechella
+      SPRING_FLYWAY_USER: usuario
+      SPRING_FLYWAY_PASSWORD: senha
+
+Com o arquivo acima criado, bastaria executar o comando docker compose up no terminal que
+já teríamos os dois containers executando com sucesso.

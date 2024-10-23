@@ -1,0 +1,15 @@
+Notificação com programação reativa
+
+Você trabalha como pessoa desenvolvedora em uma empresa que fornece um sistema de agendamento de consultas médicas.
+Foi solicitada a criação de um recurso para notificar os pacientes da posição deles na fila para consultas.
+
+Como a programação reativa pode ser usada para implementar essa funcionalidade de fila?
+
+Utilizando um padrão observer em que os pacientes se inscrevem como subscribers para receber atualizações da fila.
+
+Esta resposta utiliza o padrão observer e descreve precisamente como a programação reativa pode ser aplicada para
+notificar pacientes de forma assíncrona, e não bloqueante.
+O servidor ao alterar a fila, atuaria como publisher, notificando mudanças de posição
+e atualizando os status de consulta dos inscritos em tempo real.
+
+---------------------------------------

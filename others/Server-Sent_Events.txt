@@ -1,0 +1,101 @@
+Server-Sent Events
+
+Server-Sent Events (SSE) é uma tecnologia que permite que um servidor envie atualizações automáticas para um
+cliente via uma única conexão HTTP. É útil para aplicações que precisam de atualizações contínuas do servidor,
+como notificações em tempo real, feeds de dados ao vivo ou atualizações de estado de aplicativos.
+
+Funcionamento
+
+- Conexão unidirecional: Diferente do WebSocket, que é bidirecional, o SSE é unidirecional.
+O servidor pode enviar dados para o cliente, mas o cliente não pode enviar dados de volta pela mesma conexão.
+
+- Conexão persistente: O cliente abre uma conexão HTTP com o servidor, que permanece aberta,
+permitindo que o servidor envie eventos sempre que novos dados estiverem disponíveis.
+
+- Formato de dados: Os dados são enviados como texto simples, com eventos separados por duas novas linhas.
+Cada evento pode conter um ou mais campos de dados.
+
+Confira um exemplo de implementação com o Spring WebFlux:
+
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import java.time.Duration;
+import java.util.stream.Stream;
+
+@RestController
+public class SseController {
+
+    @GetMapping(path = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> streamEvents() {
+        return Flux.fromStream(Stream.generate(() -> "Evento: " + System.currentTimeMillis()))
+                   .delayElements(Duration.ofSeconds(1));
+    }
+}
+
+Nesse código, criamos um controlador para lidar com as requisições SSE.
+Estamos criando um Flux que gera eventos a cada segundo. Cada evento é uma string contendo um timestamp atual.
+
+Existem diversas maneiras de consumir SSE, vamos exemplificar de duas formas:
+
+1 - Diretamente pelo html, usando a API EventSource para receber os eventos:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSE Example</title>
+</head>
+<body>
+    <div id="events"></div>
+    <script>
+        const eventSource = new EventSource('/sse');
+
+        eventSource.onmessage = function(event) {
+            const newElement = document.createElement("div");
+            newElement.textContent = event.data;
+            document.getElementById("events").appendChild(newElement);
+        };
+    </script>
+</body>
+</html>
+
+2 - Também através de outra aplicação, utilizando o WebClient:
+
+public void consumirSSE() {
+    WebClient client = WebClient.create("http://localhost:8080/sse");
+    ParameterizedTypeReference<ServerSentEvent<String>> type
+     = new ParameterizedTypeReference<ServerSentEvent<String>>() {};
+
+    Flux<ServerSentEvent<String>> eventStream = client.get()
+      .retrieve()
+      .bodyToFlux(type);
+
+    eventStream.subscribe(
+      content -> logger.info("Time: {} - event: name[{}], id [{}], content[{}] ",
+        LocalTime.now(), content.event(), content.id(), content.data()),
+      error -> logger.error("Error receiving SSE: {}", error),
+      () -> logger.info("Completed!!!"));
+}
+
+Alguns benefícios e limitações do SSE:
+
+Benefícios:
+
+- Simplicidade de implementação.
+- Suporte nativo nos navegadores modernos.
+- Escalável para muitos clientes (comparado com WebSockets em alguns casos).
+
+Limitações:
+
+- É unidirecional, pois apenas o servidor pode enviar dados.
+- Tem suporte limitado em navegadores antigos.
+- Pode ser menos eficiente que WebSockets para casos de uso bidirecional.
+
+Server-Sent Event é uma ótima escolha para aplicações que necessitam de um fluxo contínuo de dados do servidor
+para o cliente, com uma implementação simples e eficiente usando Spring WebFlux.
+
+
+

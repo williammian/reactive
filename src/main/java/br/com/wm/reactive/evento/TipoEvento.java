@@ -1,4 +1,4 @@
-package br.com.wm.reactive;
+package br.com.wm.reactive.evento;
 
 public enum TipoEvento {
     SHOW,

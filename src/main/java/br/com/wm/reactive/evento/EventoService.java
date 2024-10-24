@@ -1,4 +1,4 @@
-package br.com.wm.reactive;
+package br.com.wm.reactive.evento;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,6 +44,12 @@ public class EventoService {
                     eventoExistente.setDescricao(dto.descricao());
                     return repositorio.save(eventoExistente);
                 })
+                .map(EventoDto::toDto);
+    }
+
+    public Flux<EventoDto> obterPorTipo(String tipo) {
+        TipoEvento tipoEvento = TipoEvento.valueOf(tipo.toUpperCase());
+        return repositorio.findByTipo(tipoEvento)
                 .map(EventoDto::toDto);
     }
 

@@ -1,0 +1,113 @@
+Ingresso
+
+Fazer a venda dos ingressos e depois ver a quantidade disponível.
+
+Realizar a compra, através do endpoint /ingressos/compra:
+
+IngressoController
+
+@PostMapping("/compra")
+public Mono<IngressoDto> comprar(@RequestBody CompraDto dto) {
+    return servico.comprar(dto)
+        .doOnSuccess(i -> ingressoSink.tryEmitNext(i));
+}
+
+A ideia é que a cada nova compra, o número de ingressos seja decrementado e mostrado em algum endpoint
+onde estejamos utilizando SSE, por isso usamos o ingressoSink.tryEmitNext, para avisar ao sink que tivemos alterações.
+Para representar essa compra, criei o CompraDto com o código abaixo:
+
+public record CompraDto(Long ingressoId,
+                        int total) {
+}
+
+Com essa implementação, a forma de realizar a compra utilizando o Postman é da seguinte forma:
+
+POST -> http://localhost:8080/ingressos/compra
+
+Body:
+
+{
+    "ingressoId": 1,
+    "total": 10
+}
+
+O segundo método a ser criado no controlador de ingressos é para visualizar os ingressos disponíveis em tempo real:
+
+@GetMapping(value = "/{id}/disponivel", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+public Flux<IngressoDto> totalDisponivel(@PathVariable Long id) {
+    return Flux.merge(servico.obterPorId(id), ingressoSink.asFlux())
+                .delayElements(Duration.ofSeconds(4));
+}
+
+Dessa forma, a cada nova compra, esse endpoint irá mostrar os totais atualizados, veja o exemplo abaixo.
+Primeiro criamos a conexão com esse endpoint:
+
+GET -> http://localhost:8080/ingressos/1/disponivel
+
+IngressoService
+
+@Transactional
+public Mono<IngressoDto> comprar(CompraDto dto) {
+    return repositorio.findById(dto.ingressoId())
+            .flatMap(ingresso -> {
+                Venda venda = new Venda();
+                venda.setIngressoId(ingresso.getId());
+                venda.setTotal(dto.total());
+                return vendaRepository.save(venda).then(Mono.defer(() -> {
+                    ingresso.setTotal(ingresso.getTotal() - dto.total());
+                    return repositorio.save(ingresso);
+                }));
+            }).map(IngressoDto::toDto);
+}
+
+Vamos entender exatamente o que está acontecendo no método comprar:
+
+1 - Anotação @Transactional: Indica que o método deve ser executado dentro de uma transação.
+Se alguma operação dentro do método falhar, todas as mudanças feitas no banco de dados serão revertidas (rollback).
+Aqui usamos essa anotação pois só iremos decrementar o número de ingressos depois de efetivamente
+salvar a venda no banco de dados.
+
+2 - Método comprar: Recebe um objeto CompraDto como parâmetro, que contém informações necessárias para
+realizar a compra de um ingresso, como o ingressoId e o total de ingressos a serem comprados.
+
+3 - Busca pelo ingresso (repositorio.findById(dto.ingressoId())): O método findById do repositório é
+chamado para buscar o ingresso que corresponde ao ingressoId fornecido no CompraDto.
+Este método retorna um Mono<Ingresso>, que é uma classe reativa que representa um único objeto Ingresso ou
+nenhum (caso não seja encontrado).
+
+4 - Uso do flatMap para processamento assíncrono: O flatMap é utilizado para transformar o Mono<Ingresso>
+em outro Mono que executa as operações de venda e atualização do ingresso. Se o ingresso for encontrado,
+o código dentro do flatMap será executado.
+
+5 - Criação de um objeto Venda: Dentro do flatMap, um novo objeto Venda é criado.
+O método setIngressoId define o ID do ingresso associado à venda.
+O método setTotal define a quantidade total de ingressos que estão sendo comprados.
+
+6 - Gravação da venda (vendaRepository.save(venda)): A venda é salva no banco de dados usando o
+método save do vendaRepository. Importante fazer a injeção de dependência do repositório de vendas
+na classe IngressoService, através das linhas abaixo:
+
+@Autowired
+private VendaRepository vendaRepository;
+
+A operação vendaRepository.save(venda) é assíncrona e retorna um Mono<Venda>.
+A continuação do fluxo depende da conclusão desta operação, por isso utilizamos um encadeamento com o método then.
+
+7 - Encadeamento com then e Mono.defer: Após salvar a venda, o método then é usado para indicar que
+outra operação será realizada. O Mono.defer é utilizado para criar um novo Mono que será executado
+apenas quando o Mono<Venda> anterior for concluído. Dentro do Mono.defer, o total de ingressos disponíveis
+(ingresso.getTotal()) é atualizado subtraindo o número de ingressos comprados (dto.total()).
+Em seguida, o ingresso atualizado é salvo novamente no banco de dados através do método save do repositório.
+
+8 - Conversão para IngressoDto (map(IngressoDto::toDto)): Após salvar o ingresso atualizado,
+o método map é utilizado para converter o objeto Ingresso retornado pelo Mono em um IngressoDto.
+Conforme visto anteriormente, IngressoDto::toDto é um método de conversão estático que transforma um
+objeto Ingresso em um IngressoDto, que é a forma final que será retornada ao cliente
+(nesse caso o controlador de ingressos, que chamou esse método).
+
+Repare que aqui estamos fazendo uma implementação simples, para fins de prática dos conceitos abordados.
+Não estamos validando se o total de ingressos disponíveis é maior que o total de ingressos comprados,
+bem como outras validações que seriam necessárias. Há várias possibilidades de melhorias,
+que podem ser implementadas futuramente por você.
+
+

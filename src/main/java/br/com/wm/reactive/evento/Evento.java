@@ -1,4 +1,4 @@
-package br.com.wm.reactive;
+package br.com.wm.reactive.evento;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;

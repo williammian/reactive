@@ -1,0 +1,40 @@
+Utilizando streaming de eventos
+
+Como vimos ao longo dessa aula, event streaming (transmissão de eventos) é uma abordagem de processamento de dados
+em que eventos são capturados e transmitidos em tempo real à medida que ocorrem. Isso permite que as aplicações
+respondam instantaneamente a esses eventos, tornando-as mais reativas e escaláveis.
+
+No contexto de uma aplicação Spring, o event streaming pode ser implementado usando várias tecnologias,
+como Apache Kafka, RabbitMQ e Spring WebFlux para streams HTTP.
+
+O event streaming envolve a captura de eventos (ações ou ocorrências significativas) em tempo real e a
+transmissão desses eventos a consumidores interessados. Um evento pode ser qualquer coisa,
+desde uma transação financeira até uma mudança no estado de um objeto.
+
+Situações em que geralmente utilizamos a abordagem de event streaming:
+
+- Processamento em tempo real: Quando há necessidade de processar dados em tempo real.
+Por exemplo, monitoramento de sensores IoT, rastreamento de transações financeiras, notificações ao vivo,
+atualizações de status e análise de logs em tempo real.
+
+- Desacoplamento de serviços: Event streaming permite que diferentes componentes do sistema sejam
+desenvolvidos e escalados independentemente.
+
+- Escalabilidade e resiliência: Tecnologias de streaming como Kafka são projetadas para lidar com
+grandes volumes de dados e alta taxa de transferência.
+
+- Microsserviços: Amplamente utilizado nesse tipo de arquitetura, em que diferentes serviços
+podem se comunicar através de eventos, permitindo uma arquitetura mais flexível e resiliente.
+
+- Auditoria e rastreamento: Eventos são naturalmente uma forma de log que pode ser reproduzida para auditorias.
+
+Algumas tecnologias comuns para event streaming são:
+
+- Apache Kafka: Kafka é um dos sistemas de event streaming mais populares atualmente.
+Altamente escalável e durável, usado para construir pipelines de dados em tempo real e aplicações de streaming.
+
+- RabbitMQ: É um broker de mensagens que também pode ser usado para event streaming.
+É conhecido pela sua flexibilidade e suporte a diferentes padrões de mensagens.
+
+- Spring WebFlux: Para cenários mais leves em que o streaming de eventos HTTP é suficiente.
+Ideal para aplicações web reativas que precisam de atualizações em tempo real.

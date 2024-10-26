@@ -1,0 +1,42 @@
+Documentação da API DeepL
+
+A DeepL oferece uma API de tradução completa e flexível, permitindo que pessoas desenvolvedoras integrem traduções
+de alta qualidade diretamente em suas aplicações. Para utilizar a API, é importante conhecer sua documentação,
+que fornece informações detalhadas sobre funcionalidades, endpoints, autenticação e muito mais.
+
+Documentação
+
+A documentação completa da API DeepL está disponível no site oficial (https://developers.deepl.com/docs).
+Lá você encontrará:
+
+- Visão geral: Uma introdução à API DeepL, seus recursos e casos de uso;
+
+- Guia de início rápido: Instruções passo a passo para realizar sua primeira tradução usando a API;
+
+- Referência da API: Documentação detalhada de todos os endpoints, parâmetros e respostas da API;
+
+- Especificações OpenAPI: Definição formal da API usando o padrão OpenAPI (Swagger), útil para gerar clientes de
+API automaticamente;
+
+- SDKs: Bibliotecas de código aberto em várias linguagens de programação, como Python, Node.js e PHP,
+que facilitam a integração com a API.
+
+Funcionalidades
+
+- Tradução de texto: Traduza textos entre os idiomas suportados pela DeepL com alta precisão e fluidez;
+
+- Detecção de idioma: Identifique automaticamente o idioma de um texto;
+
+- Glossários: Crie e utilize glossários personalizados para garantir traduções consistentes de termos específicos;
+
+- Controle de formalidade: Ajuste o nível de formalidade da tradução para se adequar ao contexto;
+
+- Gerenciamento de uso: Monitore o uso da API e visualize estatísticas de tradução.
+
+Segurança
+
+A API DeepL utiliza autenticação por chave de API. Para obter uma chave, é necessário criar uma conta
+DeepL Pro e ativá-la. As chaves de API devem ser mantidas em sigilo e protegidas para evitar o uso não autorizado.
+
+Ao explorar a documentação completa da API DeepL, você poderá aproveitar ao máximo as suas funcionalidades de tradução,
+podendo integrá-las facilmente em suas aplicações.

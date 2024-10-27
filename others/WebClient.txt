@@ -1,0 +1,96 @@
+WebClient
+
+O WebClient é um componente do Spring WebFlux, introduzido no Spring 5, projetado para fazer requisições HTTP de
+forma reativa e não bloqueante. Ele substitui o RestTemplate para cenários reativos e é muito flexível.
+Permite uma ampla gama de operações, desde requisições simples até operações complexas, com suporte a WebSockets,
+multipart e streaming de dados. Com ele é possível construir aplicativos escaláveis e responsivos,
+aproveitando ao máximo os benefícios da programação reativa. Confira algumas implementações abaixo:
+
+Criando instância
+
+Você pode criar uma instância do WebClient usando seu builder estático ou injetando-o no seu contexto Spring.
+
+Criação básica:
+
+WebClient webClient = WebClient.create();
+
+Configuração com o builder:
+
+WebClient webClient = WebClient.builder()
+        .baseUrl("http://example.com")
+        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .defaultUriVariables(Collections.singletonMap("url", "http://example.com"))
+        .build();
+
+Injeção com Spring:
+
+@Configuration
+public class WebClientConfig {
+    @Bean
+    public WebClient webClient() {
+        return WebClient.builder().baseUrl("http://example.com").build();
+    }
+}
+
+Requisições HTTP
+
+O WebClient permite fazer requisições HTTP de forma simples e intuitiva.
+
+Requisições GET:
+
+Mono<String> response = webClient.get()
+        .uri("/endpoint")
+        .retrieve()
+        .bodyToMono(String.class);
+
+Requisições POST:
+
+Mono<String> response = webClient.post()
+        .uri("/endpoint")
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(BodyInserters.fromValue(new MyRequestBody()))
+        .retrieve()
+        .bodyToMono(String.class);
+
+Inclusão de Headers e Query Parameters:
+
+Mono<String> response = webClient.get()
+        .uri(uriBuilder -> uriBuilder
+            .path("/endpoint")
+            .queryParam("param", "value")
+            .build())
+        .header(HttpHeaders.AUTHORIZATION, "Bearer token")
+        .retrieve()
+        .bodyToMono(String.class);
+
+Manipulação de respostas
+
+O método retrieve é usado para recuperar o corpo da resposta e tratar automaticamente os erros.
+
+Mono<String> response = webClient.get()
+        .uri("/endpoint")
+        .retrieve()
+        .bodyToMono(String.class)
+        .onStatus(HttpStatus::isError, clientResponse -> {
+            return clientResponse.bodyToMono(String.class).flatMap(error -> {
+                return Mono.error(new RuntimeException("Error response: " + error));
+            });
+        });
+
+O método exchange oferece controle sobre a requisição e a resposta.
+
+Mono<ClientResponse> response = webClient.get()
+        .uri("/endpoint")
+        .exchange();
+
+response.flatMap(clientResponse -> {
+    if (clientResponse.statusCode().is2xxSuccessful()) {
+        return clientResponse.bodyToMono(String.class);
+    } else {
+        return clientResponse.bodyToMono(String.class)
+                .flatMap(error -> Mono.error(new RuntimeException("Error response: " + error)));
+    }
+});
+
+Nessa documentação oficial do Spring (https://spring.academy/guides/spring-webclient-gs)
+tem um guia com explicações e exemplos de uso do WebClient.

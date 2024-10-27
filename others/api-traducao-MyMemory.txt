@@ -1,0 +1,80 @@
+API de tradução - MyMemory
+
+Além do DeepL, você pode utilizar outras APIs disponíveis para tradução. Uma delas, com configuração bem simples,
+é a MyMemory (https://mymemory.translated.net/doc/spec.php).
+Essa é uma API gratuita, com uso limitado a 5.000 caracteres por dia.
+
+Para utilizá-la, precisaremos criar algumas classes, como fizemos em vídeo com as classes Texto, Traducao e
+TraducaoDeTextos.
+
+1 - Podemos fazer uma requisição de teste para a API, usando a URL
+https://api.mymemory.translated.net/get?q=Hello+world&langpair=en|pt.
+Veja que estamos passando no próprio endpoint a expressão Hello world,
+com a linguagem origem en (inglês) e a linguagem para tradução pt (português).
+Com isso, vemos que os dados de resposta estão estruturados da seguinte forma:
+
+{
+  "responseData": {
+    "translatedText": "Olá mundo!",
+    "match": 1
+  },
+  "quotaFinished": false,
+  "mtLangSupported": null,
+  "responseDetails": "",
+  "responseStatus": 200,
+  "responderId": null,
+  "exception_code": null,
+  "matches": [
+    {
+….
+//código omitido
+}
+
+Ou seja, temos uma resposta, dada por responseData, e dentro de responseData, temos o campo translatedText,
+que é o que desejamos. Portanto, iremos usar dois records para representar esses dados.
+Para ficar com nomes diferentes dos que fizemos em vídeo, faremos o primeiro como DadosTraducao,
+que pegará o campo específico responseData:
+
+public record DadosTraducao(DadosResposta responseData) {
+
+  public String getTexto() {
+    return this.responseData.translatedText();
+  }
+
+}
+
+Já o segundo record será para pegarmos o campo específico da tradução, que é o translatedText.
+Essa classe será a DadosResposta:
+
+public record DadosResposta(String translatedText) {
+}
+
+2 - Agora, com as classes de consumo devidamente configuradas, podemos criar um novo método em nossa classe
+TraducaoDeTextos denominado obterTraducaoMyMemory, para comparar com o que fizemos em vídeo.
+
+public static Mono<String> obterTraducaoMyMemory(String texto, String idioma) {
+    String url = "https://api.mymemory.translated.net/get?q=" + texto + "&langpair=pt-br|" + idioma;
+
+    WebClient webClient = WebClient.builder()
+            .baseUrl(url)
+            .build();
+
+    return  webClient.get()
+            .retrieve()
+            .bodyToMono(DadosTraducao.class)
+            .map(DadosTraducao::getTexto);
+
+}
+
+3 - Por fim, precisamos adicionar a mudança na classe EventoService: em vez de utilizar o método
+TraducaoTextos.obterTraducao, usaremos TraducaoDeTextos.obterTraducaoMyMemory, conforme abaixo:
+
+public Mono<String> obterTraducao(Long id, String idioma) {
+    return repositorio.findById(id)
+     .flatMap(e -> TraducaoDeTextos.obterTraducaoMyMemory(e.getDescricao(), idioma));
+}
+
+Feitas essas alterações, terminamos a configuração! Você pode executar o projeto e ver a tradução sendo feita,
+usando exatamente o mesmo endpoint que utilizamos anteriormente,
+exemplo: http://localhost:8080/eventos/7/traduzir/en
+

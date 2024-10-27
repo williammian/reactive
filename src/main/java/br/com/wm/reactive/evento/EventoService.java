@@ -53,4 +53,14 @@ public class EventoService {
                 .map(EventoDto::toDto);
     }
 
+    public Mono<String> obterTraducao(Long id, String idioma) {
+        return repositorio.findById(id)
+                .flatMap(e -> TraducaoDeTextos.obterTraducao(e.getDescricao(), idioma));
+    }
+
+    public Mono<String> obterTraducao2(Long id, String idioma) {
+        return repositorio.findById(id)
+                .flatMap(e -> TraducaoDeTextos.obterTraducaoMyMemory(e.getDescricao(), idioma));
+    }
+
 }

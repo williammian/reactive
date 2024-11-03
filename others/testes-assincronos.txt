@@ -1,0 +1,129 @@
+Testes Assíncronos
+
+Testes de aplicações Spring assíncronas envolvem técnicas e ferramentas específicas para garantir que as
+funcionalidades assíncronas, como chamadas de métodos assíncronos, interações reativas e processos em background,
+funcionem corretamente. Listamos abaixo os principais tipos de aplicações assíncronas disponíveis no Spring,
+bem como ferramentas e bibliotecas úteis para realizar esses testes.
+
+Os tipos de aplicações assíncronas em Spring incluem:
+
+- Spring WebFlux: Utilizado para criar aplicações reativas, que são altamente escaláveis e eficientes
+em termos de recursos.
+
+- @Async: Permite a execução de métodos assíncronos, utilizando as anotações @EnableAsync e @Async para facilitar
+a implementação.
+
+- Spring Integration e Spring Batch: Adequados para integrações complexas e processamento em lote,
+permitindo a automação de tarefas e fluxos de trabalho.
+
+- Spring Messaging: Facilita a interação com sistemas de mensagens como RabbitMQ ou Kafka,
+permitindo a comunicação assíncrona entre diferentes componentes do sistema.
+
+Para realizar testes assíncronos, são utilizadas as seguintes bibliotecas e frameworks:
+
+- JUnit 5: A biblioteca de testes padrão para Java.
+
+- Mockito: Para criar mocks e verificar interações.
+
+- Reactor Test: Para testar fluxos reativos.
+
+- Awaitility: Para esperar por condições assíncronas.
+
+- Spring Boot Test: Suporte de teste integrado para aplicações Spring Boot.
+
+Tipos de teste
+
+No Spring WebFlux, as operações são reativas e não bloqueantes, baseadas em assinaturas (publish-subscribe).
+Os dados são emitidos ao longo do tempo e processados conforme ficam disponíveis.
+
+Como vimos, as operações não esperam por resultados imediatos; em vez disso, usam Mono (para zero ou um resultado) e
+Flux (para múltiplos resultados) como containers reativos. Sendo assim, podemos realizar os seguintes tipos de testes:
+
+- Unitário: Testa componentes individuais, como serviços ou repositórios, focando na lógica interna.
+
+- Integração: Testa a integração entre componentes ou sistemas, como a comunicação entre o serviço
+WebFlux e um banco de dados reativo.
+
+- Contrato: Valida que a interface entre serviços de microsserviços permanece consistente.
+
+- Carga/Performance: Avalia o desempenho sob carga, especialmente importante para APIs reativas que prometem
+alta escalabilidade.
+
+Ferramentas e abordagens
+
+1 - WebTestClient:
+
+Ferramenta principal para testar aplicações Spring WebFlux. Simula chamadas HTTP para endpoints reativos e
+pode verificar respostas de forma assíncrona. Pode ser utilizado em testes unitários e de integração.
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class MyControllerTest {
+
+    @Autowired
+    private WebTestClient webTestClient;
+
+    @Test
+    void testGetEndpoint() {
+        webTestClient.get()
+                     .uri("/api/resource")
+                     .exchange()
+                     .expectStatus().isOk()
+                     .expectBodyList(ResourceDto.class)
+                     .hasSize(10)
+                     .contains(expectedResource);
+    }
+}
+
+2 - StepVerifier:
+
+Verifica o comportamento de Mono e Flux ao longo do tempo, permitindo que você garanta o resultado do
+fluxo de dados emitido. É recomendado para testes unitários de serviços ou componentes que retornam Mono ou Flux.
+
+@Test
+void testServiceMethod() {
+    Flux<String> flux = service.getDataFlux();
+
+    StepVerifier.create(flux)
+                .expectNext("data1", "data2")
+                .expectComplete()
+                .verify();
+}
+
+3 - TestPublisher:
+
+Uma ferramenta do projeto Reactor para testar código que consome Flux ou Mono, permitindo que você controle o
+fluxo de eventos emitidos para garantir que o consumidor responda corretamente.
+Simula a emissão de dados para Flux e Mono durante o teste.
+
+@Test
+void testWithTestPublisher() {
+    TestPublisher<String> publisher = TestPublisher.create();
+
+    Flux<String> flux = publisher.flux();
+
+    StepVerifier.create(flux)
+                .then(() -> publisher.emit("data1", "data2"))
+                .expectNext("data1", "data2")
+                .expectComplete()
+                .verify();
+}
+
+Boas práticas
+
+- Evite o uso excessivo de block() e subscribe() em testes: block() e subscribe() forçam a execução
+síncrona e bloqueante, o que vai contra a natureza reativa. Use StepVerifier e WebTestClient para validar o
+comportamento reativo.
+
+- Teste comportamentos de retentativa e backpressure: Verifique se a aplicação lida corretamente com
+fluxos que falham ou são lentos. Teste a lógica de retentativa (retry) e
+backpressure (onBackpressureBuffer, onBackpressureDrop).
+
+- Use contextos de teste para configuração e isolamento: Crie contextos específicos para cada tipo de teste
+(unitário, integração) para garantir que os testes sejam isolados e não interfiram uns com os outros.
+
+- Simule cenários de falha: Teste como a aplicação responde a falhas de rede, indisponibilidade de serviços externos,
+ou dados inesperados. O uso de TestPublisher e StepVerifier é ideal para isso.
+
+- Monitoramento e tempo limite nos testes: Defina um tempo limite nos testes usando .verify(Duration.ofSeconds(5))
+para evitar que testes assíncronos perdurem indefinidamente.
+

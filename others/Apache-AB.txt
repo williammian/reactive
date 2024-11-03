@@ -1,0 +1,85 @@
+Apache AB
+
+O Apache Benchmark (AB) é uma ferramenta de linha de comando usada para realizar testes de carga e
+medir o desempenho de servidores web. Ele faz parte do pacote do servidor Apache HTTP,
+mas pode ser usado para testar qualquer servidor web, independentemente da tecnologia subjacente.
+
+O AB permite que você simule múltiplos usuários acessando simultaneamente um servidor web.
+Ele gera uma série de requisições HTTP e mede a performance do servidor ao lidar com essas requisições.
+As métricas de desempenho consideradas são:
+
+- Tempo total de execução: Quanto tempo levou para completar todas as requisições.
+
+- Requests per second (RPS): Número médio de requisições que o servidor consegue atender por segundo.
+
+- Tempo médio por requisição: Tempo médio que uma requisição leva para ser processada.
+
+- Transferência por segundo: Quantidade de dados (em bytes) transferida por segundo.
+
+- Distribuição de latência: Relatórios sobre a distribuição da latência das requisições
+(mínima, máxima, mediana, percentil).
+
+Para garantir que os testes de desempenho sejam abrangentes e atendam às necessidades de cada aplicação,
+é possível personalizar diversos parâmetros. Abaixo, listamos alguns dos principais aspectos que
+podem ser ajustados para realizar testes mais precisos:
+
+- Número de requisições: Especifica quantas requisições devem ser enviadas durante o teste.
+
+- Número de conexões simultâneas: Define quantas conexões simultâneas devem ser usadas durante o teste.
+
+- Cabeçalhos HTTP customizados: Permite a inclusão de cabeçalhos HTTP personalizados,
+como cookies ou tokens de autenticação.
+
+Métodos HTTP diferentes: AB suporta não apenas o método GET, mas também POST, e permite o envio de dados
+em requisições POST.
+
+O uso básico do Apache Benchmark envolve a execução de um comando na linha de comando,
+especificando o número de requisições e o número de usuários simultâneos, por exemplo:
+
+ab -n 1000 -c 10 http://example.com/
+
+Onde -n 1000 especifica que 1000 requisições serão enviadas e -c 10 indica que 10 requisições serão enviadas simultaneamente.
+
+Conheça os parâmetros mais comuns do Apache Benchmark que podem ser configurados para ajustar o
+comportamento do teste de acordo com as necessidades da aplicação:
+
+-n [numero]: Define o número total de requisições a serem enviadas. Exemplo: -n 1000.
+
+-c [numero]: Define o número de conexões simultâneas a serem usadas durante o teste. Exemplo: -c 10.
+
+-t [segundos]: Limita o teste a um tempo máximo em segundos, independentemente do número de requisições completadas.
+
+-p [arquivo]: Especifica um arquivo contendo os dados a serem enviados em uma requisição POST.
+
+-T [content-type]: Especifica o tipo de conteúdo do corpo da requisição (usado em conjunto com -p).
+
+-A [username:password]: Envia um cabeçalho de autenticação básico HTTP com o nome de usuário e senha fornecidos.
+
+-H [header]: Adiciona um cabeçalho HTTP personalizado. Pode ser usado múltiplas vezes para vários cabeçalhos.
+
+-X [proxy:port]: Usa um proxy para fazer as requisições.
+
+Ao final de um teste, o Apache Benchmark apresenta um resumo das estatísticas coletadas, indicando:
+
+- Concurrency Level: O número de conexões simultâneas usadas.
+
+- Time taken for tests: Tempo total que o teste levou para ser concluído.
+
+- Complete requests: Número total de requisições completadas com sucesso.
+
+- Failed requests: Número de requisições que falharam (por exemplo, por timeouts).
+
+- Requests per second: A taxa de requisições processadas por segundo.
+
+- Time per request: Tempo médio por requisição, tanto para todas as requisições quanto por conexão simultânea.
+
+- Transfer rate: Taxa de transferência de dados durante o teste.
+
+Além disso, a ferramenta fornece uma distribuição de latência (percentil 50, 75, 90 etc.),
+que ajuda a entender a variabilidade da resposta do servidor sob carga.
+
+O Apache Benchmark é uma ferramenta recomendada para testar a carga e medir o desempenho de servidores Web.
+Com a capacidade de simular múltiplos usuários simultâneos e personalizar diversos parâmetros de teste,
+fornece métricas detalhadas que ajudam a identificar pontos fortes e fracos no desempenho do servidor.
+A partir dessas informações, é possível otimizar a infraestrutura e garantir que o servidor possa lidar
+eficientemente com o tráfego esperado, proporcionando uma experiência de usuário mais confiável.

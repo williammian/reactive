@@ -1,0 +1,65 @@
+Testes comparando API Servlet com API Reativa
+
+Apache AB
+
+Projeto teste: https://github.com/jacqueline-oliveira/3857-java-spring-api-servlet
+
+Rodar api reativa na porta 8080 com Netty
+
+Rodar api servlet na porta 8081 com Tomcat
+
+GET http://localhost:8080/eventos
+
+GET http://localhost:8081/eventos
+
+Respostas idênticas
+
+GET http://localhost:8080/eventos/3/traduzir2/fr
+
+GET http://localhost:8081/eventos/3/traduzir2/fr
+
+-------------------------------------------------
+
+Comparando
+
+Prompt de comando
+
+Simular mil requisições, com concorrência de 100, por exemplo, nos endpoints responsáveis por traduzir.
+Começaremos pela API reativa, digitando o seguinte comando:
+
+ab -n 1000 -c 100 http://localhost:8080/eventos/3/traduzir2/fr
+
+Nesse caso, levou cerca de 6 segundos para realizar os testes;
+Com 159 requisições por segundo, aproximadamente;
+E a requisição mais demorada levou 1255 milissegundos na API reativa.
+
+Agora, faremos o mesmo na porta 8081, correspondente à API Servlet:
+
+ab -n 1000 -c 100 http://localhost:8081/eventos/3/traduzir2/fr
+
+Ao executar, percebemos que ela é mais lenta em comparação à versão reativa. As estatísticas mostram que a
+requisição mais demorada na API Servlet levou 7 segundos, enquanto na API reativa, o tempo foi de 1255 milissegundos.
+
+Além disso, a API Servlet fez 25 requisições por segundo, aproximadamente, enquanto a reativa fez 159 requisições
+por segundo. O teste na API reativa levou 6 segundos no total, e na Servlet, 38 segundos.
+A diferença é significativa, mostrando vantagens na API reativa.
+
+---------------------------------
+
+Por que não usamos sempre a API reativa?
+
+Nem sempre a API reativa conveniente. Ela é ideal quando precisamos trabalhar com alta concorrência, escalabilidade,
+baixa latência, performance, fluxo assíncrono, notificações em tempo real, controle de fluxo, e assim por diante.
+
+Por outro lado, para aplicações mais simples, de baixo tráfego, que exigem compatibilidade ou simplicidade para debug,
+a API Servlet pode ser mais adequada.
+
+Cada caso é único. Como pessoas desenvolvedoras, precisamos analisar o tipo de aplicação para decidir o que atende melhor.
+No caso do CodeChella, precisávamos de controle em tempo real para vendas de ingressos, então optamos pela API reativa.
+
+A decisão depende do cenário e das necessidades da empresa.
+
+Conclusão
+Ter conhecimento das ferramentas, técnicas e abordagens existentes nos ajuda a tomar decisões informadas.
+Afinal, desenvolver software não é apenas escrever código, mas entregar soluções.
+Esperamos que a comparação tenha sido útil e que esse conhecimento ajude em suas decisões!
